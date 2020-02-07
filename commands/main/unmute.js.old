@@ -1,0 +1,23 @@
+module.exports = {
+    config: {
+        name: "unmute",
+        aliases: [],
+        usage: "(command)",
+        category: "staff",
+        description: "",
+        accessableby: "staff"
+    },
+    run: async (bot, message, args) => {
+        if(!message.member.hasPermission("MANAGE_MESSAGES")) return message.channel.send("No perms");
+        //if(!message.channel.permissionsFor(message.member).hasPermission("MANAGE_MESSAGES")) return message.channel.sendMessage("No perms");
+        let person = message.guild.member(message.mentions.users.first()) || message.guild.members.get(args[0]);
+        if(!person) return message.channel.send("You didn't mention a user");
+
+        let role = message.guild.roles.find(r => r.name === "Muted");
+
+        if(!role || !person.roles.has(role.id)) return message.channel.send("not muted m8");
+
+        await person.removeRole(role);
+        message.channel.send("unmuted him m8");
+    }
+};

@@ -1,0 +1,43 @@
+module.exports = {
+    config:{
+        name: "mute",
+        aliases: [],
+        usage: "(command)",
+        category: "staff",
+        description: "",
+        accessableby: "Staff"
+    },
+    run: async (bot, message, args) => {
+    if(!message.member.hasPermission("MANAGE_MESSAGES")) return message.channel.send("No perms");
+    //if(!message.channel.permissionsFor(message.member).hasPermission("MANAGE_MESSAGES")) return message.channel.sendMessage("No perms");
+    let person = message.guild.member(message.mentions.users.first()) || message.guild.members.get(args[0]);
+    
+    if(!person) return message.channel.send("You didn't mention a user");
+    if(person.id === message.author.id) return message.channel.send("cannot mute yourself");
+    if(person.highestRole.position >= message.member.highestRole.position) return message.channel.send("you cannot mute him");
+
+    let role = message.guild.roles.find(r => r.name === "Muted");
+    if(!role) {
+        try{
+        role = await message.guild.createRole({
+            name: "Muted",
+            color: "#000000",
+            permissions: []
+        });
+        message.guild.channels.forEach(async (channel,id) => {
+            await channel.overwritePermissions(role, {
+            SEND_MESSAGES: false,
+            ADD_REACTIONS: false
+            });
+        });
+        } catch (e) {
+            console.log(e.stack);
+        };
+
+    };
+    if(person.roles.has(role.id)) return message.channel.send("already is muted m8");
+
+    await person.addRole(role);
+    message.channel.send("Muted him m8");
+}
+}
